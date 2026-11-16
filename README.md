@@ -146,6 +146,8 @@ Not verified:
 
 ## Licence and credits
 
+This project's own code (RTL, testbenches, firmware, host software and scripts) is under the MIT License; see
+[`LICENSE`](LICENSE).
 `sw/run.c` is [karpathy/llama2.c](https://github.com/karpathy/llama2.c)'s `run.c`, unmodified, and
 `sw/tok_sampler.h` is adapted from it. Both are under the MIT License; see
 [`LICENSE-llama2.c`](LICENSE-llama2.c). The stories15M model and tokenizer also come from llama2.c.
