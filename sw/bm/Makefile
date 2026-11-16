@@ -1,4 +1,6 @@
-CROSS  ?= $(HOME)/tools/build__rv32imafc/bin/riscv32-unknown-elf-
+# toolchain prefix: on PATH by default; override with make CROSS=... or in ../../local.mk
+-include ../../local.mk
+CROSS  ?= riscv32-unknown-elf-
 CC     := $(CROSS)gcc
 CFLAGS := -march=rv32imafc -mabi=ilp32f -O2 -g -Wall -Wno-unused-function \
           -fno-math-errno -ffunction-sections -fdata-sections \
@@ -12,8 +14,9 @@ fw.elf: $(SRCS) link.ld platform.h ../model.h ../accel.h ../tok_sampler.h
 
 # same firmware for qemu-system-riscv32 -machine virt, accelerator replaced by the C model
 QEMU_SRCS := start.S main.c syscalls.c ../model.c ../accel.c
-fw_qemu.elf: $(QEMU_SRCS) link.ld platform.h ../model.h ../accel.h ../tok_sampler.h
-	sed 's/ORIGIN = 0x00000000, LENGTH = 128K/ORIGIN = 0x80000000, LENGTH = 1M/' link.ld > link_qemu.ld
+link_qemu.ld: link.ld
+	sed 's/ORIGIN = 0x00000000, LENGTH = 128K/ORIGIN = 0x80000000, LENGTH = 1M/' link.ld > $@
+fw_qemu.elf: $(QEMU_SRCS) link_qemu.ld platform.h ../model.h ../accel.h ../tok_sampler.h
 	$(CC) $(filter-out -DACCEL_HAVE_FPGA,$(CFLAGS)) -DQEMU -T link_qemu.ld -nostartfiles --specs=nano.specs \
 	    -u _printf_float -Wl,--gc-sections -Wl,--no-warn-rwx-segments -o $@ $(QEMU_SRCS) -lm
 

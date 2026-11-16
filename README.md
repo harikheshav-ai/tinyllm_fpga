@@ -20,6 +20,25 @@ Every matmul, the attention scores (q·K) and softmax·V run on one int8 GEMV en
 | `rtl/status_leds.v` | VC707 bring-up status on the user LEDs |
 | `syn/ooc.tcl`, `syn/bd_kv260.tcl`, `syn/bd_vc707.tcl` | OOC timing/util; full KV260 / VC707 systems → `.bit` + `.xsa` |
 
+## Requirements
+
+- gcc and GNU make
+- Icarus Verilog (`iverilog`/`vvp`; tested with 11.0)
+- python3 with numpy (`make quality`)
+- Vivado 2024.2 (MicroBlaze V needs ≥ 2024.1) with the VC707 / KV260 board files (hardware builds only)
+- `riscv32-unknown-elf-gcc` built for rv32imafc/ilp32f with newlib-nano (`make fw`, `make qemu`)
+- `qemu-system-riscv32` (tested with 6.2)
+- pyserial, for `python3 -m serial.tools.miniterm`
+
+Tools are taken from the PATH by default. To use other locations, pass them on the command line
+(`make vc707 VIVADO=/opt/Xilinx/Vivado/2024.2/bin/vivado`, `make fw CROSS=/opt/riscv/bin/riscv32-unknown-elf-`)
+or put them in an untracked `local.mk` next to the top-level `Makefile` (it is git-ignored and also
+read by `sw/bm/Makefile`):
+
+    VIVADO := /opt/Xilinx/Vivado/2024.2/bin/vivado
+    XSDB   := /opt/Xilinx/Vivado/2024.2/bin/xsdb
+    CROSS  := /opt/riscv/bin/riscv32-unknown-elf-
+
 ## Model files (not in the repository)
 
     mkdir -p model
@@ -29,7 +48,7 @@ Every matmul, the attention scores (q·K) and softmax·V run on one int8 GEMV en
 ## Host
     make run          # int8 model with the C reference backend
     make quality      # top-1 agreement vs float model (≈0.97)
-    make sim          # random + AXI + full-token RTL co-simulation (bit-exact)
+    make sim          # random + AXI + full-token RTL co-simulation (bit-exact; ~10 min, fails unless all PASS)
     make kv260        # bitstream: syn/kv260_proj/gemv_kv260.{bit,xsa}
 
 ## On a KV260 (Ubuntu 22.04 image) — not yet tested on hardware
@@ -74,8 +93,8 @@ Bring-up notes:
   `sw/bm/diag2.tcl` (PC samples, firmware-in-BRAM check, direct UART TX test). Don't run them while
   `run.tcl` is still downloading.
 - The board is shared: check that nobody else holds the JTAG cable (e.g. `pgrep -a openocd`) before programming.
-- The bitstream verified on the board was built before the status LEDs were added (it is not in the
-  repository). `make vc707` now also drives the 8 user LEDs with bring-up status (MIG lock, DDR
+- The bitstream verified on the board was built before the status LEDs were added; it is attached to the
+  GitHub release [`vc707-verified`](https://github.com/harikheshav-ai/tinyllm_fpga/releases/tag/vc707-verified). `make vc707` now also drives the 8 user LEDs with bring-up status (MIG lock, DDR
   calibration, clock lock, resets, heartbeats; see `rtl/status_leds.v`). That build meets timing but
   hasn't been run on the board.
 
@@ -86,7 +105,8 @@ the model image (0x9000_0000), tokenizer (0x9100_0000) and KV caches (0x9200_000
 
     make vc707                 # bitstream: syn/vc707_proj/gemv_vc707.bit (~20 min)
     make fw                    # sw/bm/fw.elf (riscv32-unknown-elf-gcc, rv32imafc/ilp32f)
-    make qemu                  # same firmware on qemu-system-riscv32 (C model instead of the FPGA)
+    make qemu                  # same firmware on qemu-system-riscv32 (C model instead of the FPGA);
+                               # interactive: type at `prompt>`, quit with Ctrl-A X
     make run-vc707             # xsdb: program FPGA, JTAG-load model + tokenizer into DDR, start
     python3 -m serial.tools.miniterm /dev/ttyUSB2 115200   # CP2103 UART; needs dialout group or a chmod
 

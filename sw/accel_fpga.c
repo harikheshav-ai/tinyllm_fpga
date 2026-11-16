@@ -4,7 +4,8 @@
 // Buffers come from a u-dma-buf device (https://github.com/ikwzm/udmabuf), e.g.
 //   sudo insmod u-dma-buf.ko udmabuf0=67108864
 // Control registers are mapped through /dev/mem, so run as root.
-// Build: gcc -O3 -DACCEL_HAVE_FPGA -o runq8 runq8.c accel.c accel_fpga.c -lm
+// Build: gcc -O3 -DACCEL_HAVE_FPGA -o runq8 runq8.c model.c accel.c accel_fpga.c -lm
+//   (or: make build/runq8_fpga)
 #include <fcntl.h>
 #include <stdint.h>
 #include <stdio.h>

@@ -5,6 +5,10 @@ model/
 build/
 sw/bm/*.elf
 sw/bm/*.map
+sw/bm/link_qemu.ld
+
+# Local tool paths (see Makefile)
+local.mk
 
 # Vivado projects, logs and bitstreams: keep only the scripts and constraints
 syn/*
