@@ -4,6 +4,9 @@
 > direction, review and running the hardware steps on the shared VC707. How the session went,
 > including its mistakes, is in [`SESSION_ANALYSIS.md`](SESSION_ANALYSIS.md).
 
+> **Reproduced from a fresh clone on 2026-11-16:** `make run`, `make quality` (top-1 0.973, perplexity 1.471),
+> `make sim` (0 errors in all three tests), `make fw` and `make qemu`. Vivado builds and the board run are from 2026-09-30.
+
 Every matmul, the attention scores (q·K) and softmax·V run on one int8 GEMV engine
 (`rtl/gemv_int8.v`, 32 int8 lanes/cycle). The CPU does RMSNorm, RoPE, softmax, SiLU and rescaling.
 
