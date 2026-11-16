@@ -1,0 +1,18 @@
+# Model weights (download: see README.md)
+model/
+
+# Build output, traces and binaries
+build/
+sw/bm/*.elf
+sw/bm/*.map
+
+# Vivado projects, logs and bitstreams: keep only the scripts and constraints
+syn/*
+!syn/*.tcl
+!syn/*.xdc
+
+__pycache__/
+*.pyc
+
+# Full local session log (redacted analysis is SESSION_ANALYSIS.md)
+SESSION_REPORT.md
